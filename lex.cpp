@@ -54,8 +54,8 @@ typedef struct
 
 const int INTMAX = 2147483647;
 Token token;
-static int filePoint = 0; // 文件指针
-static int lineIndex = 1; // 行号
+int filePoint = 0; // 文件指针
+int lineIndex = 1; // 行号
 string resource = ""; // 源代码
 string reservedWord[] = {"int", "char", "void", "const", "main", "if", "else", "while", "switch", "case", "scanf", "printf", "return"}; // 保留字
 string reservedName[] = {"INT", "CHAR", "VOID", "CONST", "MAIN", "IF", "ELSE", "WHILE", "SWITCH", "CASE", "SCANF", "PRINTF", "RETURN"};
@@ -85,8 +85,14 @@ void writeToken(string name, int nameid, string id, int value){
     token.nameid = nameid;
     token.id = id;
     token.value = value;
-    cout<<id<<endl;
+    //cout<<id<<endl;
     tokenFile<<name<<'\t'<<nameid<<'\t'<<id<<'\t'<<value<<endl;
+}
+
+void lex_init()
+{
+    filePoint = 0;
+    lineIndex = 1;
 }
 
 /**获取下一个token**/

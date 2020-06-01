@@ -12,9 +12,10 @@ using namespace std;
 #define TYPE_STRING 5
 
 //符号表中 value字段
-#define FUNC_VOID   0
-#define FUNC_INT    1
-#define FUNC_CHAR   2
+#define VALUE_VAR         -1
+#define VALUE_FUNC_VOID   0
+#define VALUE_FUNC_INT    1
+#define VALUE_FUNC_CHAR   2
 
 const int MAX_SYMBOL_NUM = 512;
 const int MAX_FUNC_NUM = 512;

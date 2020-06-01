@@ -1,10 +1,15 @@
 #include "lex.cpp"
+#include "symbol.cpp"
 #include "genmidcode.cpp"
 
 /**保存现场用的**/
 int preFilePoint;   //暂时记录文件指针
 int preLineIndex;   //暂时记录文件行号
 Token preToken;     //暂时记录token
+
+/**插入符号表用的临时变量**/
+char name[512];
+int address = 0;    //偏移地址
 
 //保存现场
 void save_scene()
@@ -134,6 +139,7 @@ void _var_dec()
 void _const_dec(){
     while(token.nameid==CONST){
         getnext();
+        printf("<常量声明>:=<常量定义>\n");
         _const_def();
         if(token.nameid != SEMIC){
             error(SEMI_ERROR, lineIndex);
@@ -290,6 +296,7 @@ void _const_def()
                 error(ID_ERROR, lineIndex);
                 exit(0);
             }
+            strcpy(name, token.id.c_str());
             getnext();
             if(token.nameid != EQUAL){
                 error(CONST_DEF_ASSIGN_ERROR, lineIndex);
@@ -300,6 +307,7 @@ void _const_def()
                 error(CONST_DEF_ASSIGN_ERROR, lineIndex);
                 exit(0);
             }
+            insert_symbol(name, TYPE_CONST, token.value, address++, -1);
             getnext();
         }while(token.nameid == COMMA);
     }
@@ -318,6 +326,7 @@ void _var_def()
             error(ID_ERROR, lineIndex);
             exit(0);
         }
+        strcpy(name, token.id.c_str());
         getnext();
         if(token.nameid == LMPAREN){
             getnext();
@@ -331,7 +340,10 @@ void _var_def()
                 exit(0);
             }
             getnext();
+        }else{
+            insert_symbol(name, TYPE_VAR, VALUE_VAR, address++, -1);
         }
+
     }while(token.nameid == COMMA);
 }
 
@@ -800,7 +812,7 @@ void _factor()
     }else if(token.nameid == ID){
         save_scene();
         getnext();
-        cout<<token.id<<endl;
+        //cout<<token.id<<endl;
         if(token.nameid == LPAREN){
             restore_scene();
             _val_fun_call();
