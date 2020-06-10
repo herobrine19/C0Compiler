@@ -9,7 +9,12 @@ Token preToken;     //暂时记录token
 
 /**插入符号表用的临时变量**/
 char name[512];
-int address = 0;    //偏移地址
+int type;
+int value;
+int address;
+int paranum;
+int arrsize;
+int num = 0;
 
 //保存现场
 void save_scene()
@@ -190,6 +195,9 @@ void _void_func_def()
 {
     getnext();
     if(token.nameid == ID){
+        strcpy(name, token.id.c_str());
+        address = 0;
+        insert_symbol(name, TYPE_FUNC, VALUE_FUNC_VOID, 0, -1);
         getnext();
         if(token.nameid==LPAREN){
             getnext();
@@ -228,6 +236,9 @@ void _main_func()
 {
     getnext();
     if(token.nameid==MAIN){
+        strcpy(name, token.id.c_str());
+        address = 0;
+        insert_symbol(name, TYPE_FUNC, VALUE_FUNC_VOID, 0, -1);
         getnext();
         if(token.nameid==LPAREN){
             getnext();
@@ -270,6 +281,7 @@ void _const_def()
                 error(ID_ERROR, lineIndex);
                 exit(0);
             }
+            strcpy(name, token.id.c_str());
             getnext();
             if(token.nameid != EQUAL){
                 error(CONST_DEF_ASSIGN_ERROR, lineIndex);
@@ -285,6 +297,12 @@ void _const_def()
                 error(CONST_DEF_TYPE_ERROR, lineIndex);
                 exit(0);
             }
+            if(flag){
+                value = 0-token.value;
+            }else{
+                value = token.value;
+            }
+            insert_symbol(name, TYPE_CONST, value, ++address, -1);
             getnext();
         }while(token.nameid == COMMA);       
     }
@@ -307,7 +325,7 @@ void _const_def()
                 error(CONST_DEF_ASSIGN_ERROR, lineIndex);
                 exit(0);
             }
-            insert_symbol(name, TYPE_CONST, token.value, address++, -1);
+            insert_symbol(name, TYPE_CONST, token.value, ++address, -1);
             getnext();
         }while(token.nameid == COMMA);
     }
@@ -334,14 +352,17 @@ void _var_def()
                 error(VAR_DEF_ARRAYINDEX_ERROR, lineIndex);
                 exit(0);
             }
+            arrsize=token.value;
+            address+=arrsize;
             getnext();
             if(token.nameid != RMPAREN){
                 error(RBRA_ERROR, lineIndex);
                 exit(0);
             }
+            insert_symbol(name, TYPE_ARRAY, -1, address, arrsize);
             getnext();
         }else{
-            insert_symbol(name, TYPE_VAR, VALUE_VAR, address++, -1);
+            insert_symbol(name, TYPE_VAR, VALUE_VAR, ++address, -1);
         }
 
     }while(token.nameid == COMMA);
@@ -352,6 +373,9 @@ void _dec_head()
     if(token.nameid == INT || token.nameid == CHAR){
         getnext();
         if(token.nameid == ID){
+            strcpy(name, token.id.c_str());
+            address = 0;
+            insert_symbol(name, TYPE_FUNC, value, 0, -1);
             printf("This is a defination head!\n");
             getnext();        
         }else{
@@ -364,12 +388,14 @@ void _dec_head()
 void _para_list()
 {
     do{
-        //getnext();
         if(token.nameid == COMMA){
             getnext();
         }
         if(token.nameid == INT || token.nameid == CHAR){
             getnext();
+            strcpy(name, token.id.c_str());
+            insert_symbol(name, TYPE_PARA, -1, ++address, -1);
+            paranum ++;
             if(token.nameid != ID){
                 error(ID_ERROR, lineIndex);
                 exit(0);
@@ -377,6 +403,7 @@ void _para_list()
             getnext();
         }
     }while(token.nameid == COMMA);
+    insert_para(paranum);
 }
 
 void _comp_state()

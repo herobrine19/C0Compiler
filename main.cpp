@@ -21,18 +21,24 @@ string readFileIntoString(const string& filename)
 
 int main()
 {
-    for(int i=0;i<19;i++)
+    for(int i=1;i<2;i++)
     {
+        ofstream symbol("./symbol.txt");
         cout<<"**************************************************************************"<<endl;
         printf("Now test%d:\n", i);
-        char name[30];
-        sprintf(name, "../test/test%d.txt", i);
-        resource = readFileIntoString(name);
+        char fileName[30];
+        sprintf(fileName, "../test/test%d.txt", i);
+        resource = readFileIntoString(fileName);
         //cout<<resource<<endl;
         //int n = resource.length();
+        init_symbol_table();
         lex_init();
         getnext();
         _program();
+        for (int j = 0; j < symbolTable.top; j++)
+        {
+            symbol << "name= " << symbolTable.elements[j].name << " type= " << symbolTable.elements[j].type << " value= " << symbolTable.elements[j].value << " adress= " << symbolTable.elements[j].address << " para= " << symbolTable.elements[j].para << endl;
+        }
         printf("Test%d end!\n", i);
         cout<<"**************************************************************************"<<endl;
 

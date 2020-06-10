@@ -39,13 +39,13 @@ typedef struct
 
 SymbolTable symbolTable;
 
-// /**初始化符号表**/
-// void init_symbol_table()
-// {
-//     symbolTable.top = 0;
-//     symbolTable.funcIndex[0] = 0;
-//     symbolTable.funcTotal = 1;
-// }
+ /**初始化符号表**/
+ void init_symbol_table()
+ {
+     symbolTable.top = 0;
+     //symbolTable.funcIndex[0] = 0;
+     symbolTable.funcTotal = 0;
+ }
 
 /**向符号表插入元素**/
 void insert_symbol(char *name, int type, int value, int address, int para)
