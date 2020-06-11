@@ -1,6 +1,8 @@
 #include <iostream>
 #include <cstring>
 
+
+ofstream four("./fouroved.txt");
 typedef struct 
 {
     char op[8];
@@ -12,7 +14,7 @@ typedef struct
 int codeNum;
 int labNum;
 int varNum;
-char op[12];
+
 FourCode midcode[512];
 
 int is_number(char *a, int len){
@@ -45,6 +47,8 @@ void genMidcode(char *op, char *a, char *b, char *result)
     strcpy(midcode[codeNum].arg1, a);
     strcpy(midcode[codeNum].arg2, b);
     strcpy(midcode[codeNum].result, result);
+    four<<"op= "<<op<<"\tnum_a= "<<a<<"\tnum_b= "<<b<<"\tresult= "<<result<<endl;
+
     codeNum ++;
 }
 

@@ -2,6 +2,7 @@
 #include <fstream>
 #include <cstring>
 #include <sstream>
+#include <iomanip>
 #include "grammar.cpp"
 using namespace std;
 
@@ -21,10 +22,11 @@ string readFileIntoString(const string& filename)
 
 int main()
 {
-    for(int i=1;i<2;i++)
+    for(int i=0;i<19;i++)
     {
         ofstream symbol("./symbol.txt");
-        cout<<"**************************************************************************"<<endl;
+
+        cout<<"****************************************************************************************************************************************************"<<endl;
         printf("Now test%d:\n", i);
         char fileName[30];
         sprintf(fileName, "../test/test%d.txt", i);
@@ -35,12 +37,18 @@ int main()
         lex_init();
         getnext();
         _program();
-        for (int j = 0; j < symbolTable.top; j++)
-        {
-            symbol << "name= " << symbolTable.elements[j].name << " type= " << symbolTable.elements[j].type << " value= " << symbolTable.elements[j].value << " adress= " << symbolTable.elements[j].address << " para= " << symbolTable.elements[j].para << endl;
+        for (int j = 0; j < symbolTable.top; j++){
+            symbol << "name= " << symbolTable.elements[j].name << "\ttype= " << symbolTable.elements[j].type << "\tvalue= " << symbolTable.elements[j].value << "\tadress= " << symbolTable.elements[j].address << "\tpara= " << symbolTable.elements[j].para << endl;
+            //symbol<<symbolTable.elements[j].name <<'\t'<< symbolTable.elements[j].type << '\t'<< symbolTable.elements[j].value <<'\t'<< symbolTable.elements[j].address <<'\t'<< symbolTable.elements[j].para << endl;
         }
+//        for (int j = 0; j < codeNum; j++){
+//            if (strcmp(midcode[j].op, " ") == 0){
+//                continue;
+//            }
+//            four << "op=" << midcode[j].op << "\tnum_a=" << midcode[j].arg1 << "\tnum_b=" << midcode[j].arg2 << "\tresult=" << midcode[j].result << endl;
+//        }
         printf("Test%d end!\n", i);
-        cout<<"**************************************************************************"<<endl;
+        cout<<"****************************************************************************************************************************************************"<<endl;
 
     }
 

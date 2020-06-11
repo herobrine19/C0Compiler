@@ -194,7 +194,7 @@ typedef struct
 
 ## 五、mips汇编生成
 
-
+![](https://tva1.sinaimg.cn/large/007S8ZIlly1gfn2ieexfnj30mb0hlwhj.jpg)
 
 ## 六、优化
 
@@ -216,7 +216,6 @@ typedef struct
 
 3. 
 
-   
 
 
 
