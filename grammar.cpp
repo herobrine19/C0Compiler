@@ -106,7 +106,8 @@ void _program() //程序
         else if(token.nameid == SEMIC || token.nameid == COMMA || token.nameid == LMPAREN)
         {//进入变量声明
             restore_scene();
-            _var_def();
+            strcpy(op, token.id.c_str());
+            _var_def();// TODO 可能是_var_dec();
             if(token.nameid !=SEMIC){
                 error(SEMI_ERROR, lineIndex);
                 exit(0);
@@ -781,7 +782,11 @@ void _assign_state()
     if(token.nameid == EQUAL){
         getnext();
         _expr();
-        printf("普通变量赋值\n");
+        strcpy(arg1, tempstack.top().c_str());
+        tempstack.pop();
+        strcpy(result, tempstack.top().c_str());
+        genMidcode("=", arg1, SPACE, result);
+        printf("普通变量赋值\n");//TODO 还有可能是数组变量赋值，数组在右边
     }else if(token.nameid == LMPAREN){
         getnext();
         _expr();
@@ -790,6 +795,13 @@ void _assign_state()
             if(token.nameid == EQUAL){
                 getnext();
                 _expr();
+                strcpy(arg1, tempstack.top().c_str());
+                tempstack.pop();
+                strcpy(arg2, tempstack.top().c_str());
+                tempstack.pop();
+                strcpy(result, tempstack.top().c_str());
+                tempstack.pop();
+                genMidcode("arrayl", arg1, arg2, result);
             }else{
                 error(ASSIGN_ERROR, lineIndex);
                 exit(0);

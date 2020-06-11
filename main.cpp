@@ -3,7 +3,7 @@
 #include <cstring>
 #include <sstream>
 #include <iomanip>
-#include "grammar.cpp"
+#include "asm.cpp"
 using namespace std;
 
 //从文件读入到string里
@@ -22,7 +22,7 @@ string readFileIntoString(const string& filename)
 
 int main()
 {
-    for(int i=0;i<19;i++)
+    for(int i=1;i<2;i++)
     {
         ofstream symbol("./symbol.txt");
 
