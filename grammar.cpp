@@ -22,7 +22,7 @@ char op[8];
 char arg1[128];
 char arg2[128];
 char result[128];
-char SPACE[128];
+char SPACE[128]=" ";
 char switchlabel[16];
 char switchvalue[16];
 char lastlab[16];
@@ -925,20 +925,45 @@ void _return_state()
     }
 }
 
-void _expr()
+void _expr() // TODO 中间代码生成·
 {
     if(token.nameid == PLUS || token.nameid == MINUS){
+//        tempstack.push("0");
+//        strcpy(op, token.id.c_str());
         getnext();
         _term();
+//        strcpy(arg2, tempstack.top().c_str());
+//        tempstack.pop();
+//        strcpy(arg1, tempstack.top().c_str());
+//        tempstack.pop();
+//        strcpy(result, genVar());
+//        tempstack.push(result);
+//        genMidcode(op, arg1, arg2, result);
         while(token.nameid == PLUS || token.nameid == MINUS){
+//            strcpy(op, token.id.c_str());
             getnext();
             _term();
+//            strcpy(arg2, tempstack.top().c_str());
+//            tempstack.pop();
+//            strcpy(arg1, tempstack.top().c_str());
+//            tempstack.pop();
+//            strcpy(result, genVar());
+//            tempstack.push(result);
+//            genMidcode(op, arg1, arg2, result);
         }
     }else{
         _term();
         while(token.nameid == PLUS || token.nameid == MINUS){
+//            strcpy(op, token.id.c_str());
             getnext();
             _term();
+//            strcpy(arg2, tempstack.top().c_str());
+//            tempstack.pop();
+//            strcpy(arg1, tempstack.top().c_str());
+//            tempstack.pop();
+//            strcpy(result, genVar());
+//            tempstack.push(result);
+//            genMidcode(op, arg1, arg2, result);
         }
     }
 }

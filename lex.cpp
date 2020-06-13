@@ -62,25 +62,38 @@ string reservedName[] = {"INT", "CHAR", "VOID", "CONST", "MAIN", "IF", "ELSE", "
 
 ofstream tokenFile("token.txt");
 
-bool is_digit(char a){
+bool is_digit(char a)
+{
     return (a>='0' && a<='9');
 }
 
-bool is_letter(char a){
+bool is_letter(char a)
+{
     return ((a>='a' && a<='z') || (a>='A' && a<='Z') || a=='_');
 }
 
 /**判断是否为保留字**/
-int searchReservedWord(char temp[]){
-    for(int i=0;i<13;i++){
-        if(reservedWord[i].compare(temp) == 0){
+int searchReservedWord(char temp[])
+{
+    for(int i=0;i<13;i++)
+    {
+        if(reservedWord[i].compare(temp) == 0)
+        {
             return i;
         }
     }
     return -1;  
 }
 
-void writeToken(string name, int nameid, string id, int value){
+/**
+ *
+ * @param name
+ * @param nameid
+ * @param id
+ * @param value
+ */
+void writeToken(string name, int nameid, string id, int value)
+{
     token.name = name;
     token.nameid = nameid;
     token.id = id;
@@ -96,10 +109,13 @@ void lex_init()
 }
 
 /**获取下一个token**/
-void getnext(){
+void getnext()
+{
     char ch = resource[filePoint++];
-    while(ch=='\n' || ch=='\t' || ch=='\v' || ch==' ' || ch=='\r'){
-        if(ch=='\n'){
+    while(ch=='\n' || ch=='\t' || ch=='\v' || ch==' ' || ch=='\r')
+    {
+        if(ch=='\n')
+        {
             lineIndex++; //记录行号
         }
         ch = resource[filePoint++];
@@ -109,15 +125,18 @@ void getnext(){
         long long tmp=ch-'0';
         int flag = (ch=='0'?1:0);
         ch = resource[filePoint++];
-        while(is_digit(ch)){
+        while(is_digit(ch))
+        {
             tmp = tmp*10+(ch-'0');
             ch = resource[filePoint++];
         }
-        if(flag == 1 && tmp!=0){
+        if(flag == 1 && tmp!=0)
+        {
             error(ZERO_START_ERROR, lineIndex);
             exit(0);
         }
-        if(tmp > INTMAX){
+        if(tmp > INTMAX)
+        {
             error(OUT_OF_BOUND_ERROR, lineIndex);
             exit(0);
         }        
@@ -131,13 +150,15 @@ void getnext(){
         int i = 1;
         tmps[0] = ch;
         ch = resource[filePoint++];
-        while(is_letter(ch) || is_digit(ch)){
+        while(is_letter(ch) || is_digit(ch))
+        {
             tmps[i++] = ch;
             ch = resource[filePoint++];
         }
         tmps[i] = '\0';
         int n = searchReservedWord(tmps);
-        if(n==-1){
+        if(n==-1)
+        {
             writeToken("ID", ID, tmps, 0);
             filePoint--;
             return;
@@ -149,9 +170,11 @@ void getnext(){
             return;
         }    
     }
-    else if(ch == '>'){
+    else if(ch == '>')
+    {
         ch = resource[filePoint];
-        if(ch == '='){
+        if(ch == '=')
+        {
             filePoint++;
             writeToken("NOTSMALL", NOTSAMLL, ">=", 0);
             return;
@@ -161,13 +184,12 @@ void getnext(){
             writeToken("BIGTH", BIGTH, ">", 0);
             return;
         }
-        
-       
     }
     else if(ch == '<')
     {
         ch = resource[filePoint];
-        if(ch == '='){
+        if(ch == '=')
+        {
             filePoint++;
             writeToken("NOTBIG", NOTBIG, "<=", 0);
             return;
@@ -232,15 +254,18 @@ void getnext(){
         writeToken("LMPAREN", LMPAREN, "[", 0);
         return;
     }
-    else if(ch==']'){
+    else if(ch==']')
+    {
         writeToken("RMPAREN", RMPAREN, "]", 0);
         return;
     }
-    else if(ch=='('){
+    else if(ch=='(')
+    {
         writeToken("LPAREN", LPAREN, "(", 0);
         return;
     }
-    else if(ch==')'){
+    else if(ch==')')
+    {
         writeToken("RPAREN", RPAREN, ")", 0);
         return;
     }
@@ -287,11 +312,13 @@ void getnext(){
             tmps[i++] = ch;
             ch = resource[filePoint++];           
         }
-        if(ch=='\"'){
+        if(ch=='\"')
+        {
             tmps[i]='\0';
             writeToken("STRING", STRING, tmps, 0);
             return;
-        }else{
+        }
+        else{
             error(NO_MATCH_DQ_ERROR, lineIndex);
             exit(0);
         }

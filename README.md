@@ -194,7 +194,18 @@ typedef struct
 
 ## 五、mips汇编生成
 
+### 1. MIPS编译器寄存器使用约定
+
 ![](https://tva1.sinaimg.cn/large/007S8ZIlly1gfn2ieexfnj30mb0hlwhj.jpg)
+
+### 2. 指令解析
+
+| 指令             | 含义             |
+| ---------------- | ---------------- |
+| `li $v0, 立即数` | 取立即数         |
+| `la $t0,var1`    | 将var1的地址给t0 |
+
+
 
 ## 六、优化
 

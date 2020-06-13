@@ -22,7 +22,7 @@ string readFileIntoString(const string& filename)
 
 int main()
 {
-    for(int i=1;i<2;i++)
+    for(int i=2;i<3;i++)
     {
         ofstream symbol("./symbol.txt");
 
@@ -41,6 +41,7 @@ int main()
             symbol << "name= " << symbolTable.elements[j].name << "\ttype= " << symbolTable.elements[j].type << "\tvalue= " << symbolTable.elements[j].value << "\tadress= " << symbolTable.elements[j].address << "\tpara= " << symbolTable.elements[j].para << endl;
             //symbol<<symbolTable.elements[j].name <<'\t'<< symbolTable.elements[j].type << '\t'<< symbolTable.elements[j].value <<'\t'<< symbolTable.elements[j].address <<'\t'<< symbolTable.elements[j].para << endl;
         }
+        run();
 //        for (int j = 0; j < codeNum; j++){
 //            if (strcmp(midcode[j].op, " ") == 0){
 //                continue;
