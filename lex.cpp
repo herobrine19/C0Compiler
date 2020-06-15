@@ -56,7 +56,8 @@ const int INTMAX = 2147483647;
 Token token;
 int filePoint = 0; // 文件指针
 int lineIndex = 1; // 行号
-string resource = ""; // 源代码
+
+string resource = "";//源代码
 string reservedWord[] = {"int", "char", "void", "const", "main", "if", "else", "while", "switch", "case", "scanf", "printf", "return"}; // 保留字
 string reservedName[] = {"INT", "CHAR", "VOID", "CONST", "MAIN", "IF", "ELSE", "WHILE", "SWITCH", "CASE", "SCANF", "PRINTF", "RETURN"};
 

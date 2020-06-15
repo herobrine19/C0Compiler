@@ -6,6 +6,7 @@
 #include "asm.cpp"
 using namespace std;
 
+ofstream four2("./output/fourcode2.txt");
 //从文件读入到string里
 string readFileIntoString(const string& filename)
 {
@@ -19,10 +20,42 @@ string readFileIntoString(const string& filename)
     return buf.str();
 }
 
+void first_scan(string s)
+{
+    int i;
+    string temps = "";
+    for (i = 0; i < s.size(); i++)
+    {
+        if (s[i] == '/' && s[i + 1] == '*')
+        {
+            i += 2;
+            while (s[i] != '*' || s[i + 1] != '/')
+            {
+                i++;
+                if (i == s.size())
+                {
+                    cout << "ERROR NOT FOUND */" << endl;
+                    exit(0);
+                }
+            }
+            i += 2;
+        }
+        if (s[i] == '/' && s[i + 1] == '/')
+        {
+            i += 2;
+            while (s[i] != '\n')
+            {
+                i++;
+            }
+        }
+        temps = temps + s[i];
+    }
+    resource = temps;
+}
 
 int main()
 {
-    for(int i=1;i<2;i++)
+    for(int i=19;i<20;i++)
     {
 
         while(!tempstack.empty()){
@@ -33,6 +66,7 @@ int main()
         char fileName[30];
         sprintf(fileName, "../test/test%d.txt", i);
         resource = readFileIntoString(fileName);
+        first_scan(resource);
         //cout<<resource<<endl;
         //int n = resource.length();
         lex_init();
@@ -40,17 +74,23 @@ int main()
         init_symbol_table();
         init_fourcode();
         _program();
+        optimize_first();
 //        for (int j = 0; j < symbolTable.top; j++){
 //            symbol << "name= " << symbolTable.elements[j].name << "\ttype= " << symbolTable.elements[j].type << "\tvalue= " << symbolTable.elements[j].value << "\tadress= " << symbolTable.elements[j].address << "\tpara= " << symbolTable.elements[j].para << endl;
 //            //symbol<<symbolTable.elements[j].name <<'\t'<< symbolTable.elements[j].type << '\t'<< symbolTable.elements[j].value <<'\t'<< symbolTable.elements[j].address <<'\t'<< symbolTable.elements[j].para << endl;
 //        }
         run();
-//        for (int j = 0; j < codeNum; j++){
-//            if (strcmp(midcode[j].op, " ") == 0){
-//                continue;
-//            }
-//            four << "op=" << midcode[j].op << "\tnum_a=" << midcode[j].arg1 << "\tnum_b=" << midcode[j].arg2 << "\tresult=" << midcode[j].result << endl;
-//        }
+        for (int j = 0; j < codeNum; j++){
+            if (strcmp(midcode[j].op, " ") == 0){
+                continue;
+            }
+            four2<<"op= "    <<setw(10)<<setiosflags(ios::left)<<midcode[j].op
+                 <<"num_a= " <<setw(10)<<setiosflags(ios::left)<<midcode[j].arg1
+                 <<"num_b= " <<setw(10)<<setiosflags(ios::left)<<midcode[j].arg2
+                 <<"result= "<<setw(10)<<setiosflags(ios::left)<<midcode[j].result
+                 <<endl;
+            //four2 << "op=" << midcode[j].op << "\tnum_a=" << midcode[j].arg1 << "\tnum_b=" << midcode[j].arg2 << "\tresult=" << midcode[j].result << endl;
+        }
         printf("Test%d end!\n", i);
         cout<<"****************************************************************************************************************************************************"<<endl;
 

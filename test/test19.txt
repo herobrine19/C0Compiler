@@ -1,0 +1,9 @@
+void main()
+{
+    int c,d;
+    c=1+2+3+4+5;
+    d=8;
+    d=c+d;
+    printf(c);
+    printf("  ",d);
+}

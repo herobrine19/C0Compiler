@@ -22,7 +22,7 @@ char op[8];
 char arg1[128];
 char arg2[128];
 char result[128];
-char SPACE[128];
+
 char switchlabel[16];
 char switchvalue[16];
 char lastlab[16];

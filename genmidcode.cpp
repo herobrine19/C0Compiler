@@ -14,6 +14,7 @@ typedef struct
 int codeNum;
 int labNum;
 int varNum;
+char SPACE[128];
 
 FourCode midcode[512];
 
@@ -64,6 +65,129 @@ void genMidcode(char *op, char *a, char *b, char *result)
     codeNum ++;
 }
 
+/**下面是优化代码**/
+void replace(char *result, char *a, int b)
+{
+    for (int i = b +1; i < codeNum; i++)
+    {
+        if (strcmp(midcode[i].op, "func") == 0 || strcmp(midcode[i].op, "funct") == 0 || strcmp(midcode[i].op, "MAIN") == 0)
+        {
+            break;
+        }
+        else
+        {
+            if (strcmp(midcode[i].arg1, result) == 0)
+            {
+                strcpy(midcode[i].arg1, a);
+            }
+            if (strcmp(midcode[i].arg2, result) == 0)
+            {
+                strcpy(midcode[i].arg2, a);
+            }
+        }
+    }
+}
+
+/**
+ * TODO
+ * @param result
+ * @param a
+ * @param b
+ */
+void replace2(char *result, char *a, int b)
+{
+    for(int i=b+1;i<codeNum;i++)
+    {
+        if(strcmp(midcode[i].op, "func")==0||strcmp(midcode[i].op, "funct")==0||strcmp(midcode[i].op, "MAIN")==0||strcmp(midcode[i].op, "lab")==0)
+        {
+            //只能在一个模块里进行替换,如果进入下一个模块就退出
+            break;
+        }
+        else if (strcmp(midcode[i].op, "=")==0 && strcmp(midcode[i].result, result) == 0)
+        {
+            //如果对result这个变量进行了二次赋值，就不能再常数替换了，break；
+            break;
+        }
+        else
+        {
+            if(strcmp(midcode[i].arg1, result)==0)
+            {
+                strcmp(midcode[i].arg1, a);
+            }
+            if(strcmp(midcode[i].arg2, result)==0)
+            {
+                strcmp(midcode[i].arg2, a);
+            }
+        }
+    }
+}
+
+void optimize_first()
+{
+    int i=0;
+    while(i<codeNum)
+    {
+        if(strcmp(midcode[i].op, "+")==0 && is_number(midcode[i].arg1, strlen(midcode[i].arg1)) && is_number(midcode[i].arg2, strlen(midcode[i].arg2)))
+        {
+            int a = atoi(midcode[i].arg1)+atoi(midcode[i].arg2);
+            char tempResult[64];
+            char c[64];
+            sprintf(c,"%d",a);
+            strcpy(tempResult, midcode[i].result);
+            strcpy(midcode[i].op, SPACE);
+            strcpy(midcode[i].arg1, SPACE);
+            strcpy(midcode[i].arg2, SPACE);
+            strcpy(midcode[i].result, SPACE);
+            replace(tempResult, c, i);
+        }
+        else if(strcmp(midcode[i].op, "-")==0 && is_number(midcode[i].arg1, strlen(midcode[i].arg1)) && is_number(midcode[i].arg2, strlen(midcode[i].arg2)))
+        {
+            int a = atoi(midcode[i].arg1)-atoi(midcode[i].arg2);
+            char tempResult[64];
+            char c[64];
+            sprintf(c,"%d",a);
+            strcpy(tempResult, midcode[i].result);
+            strcpy(midcode[i].op, SPACE);
+            strcpy(midcode[i].arg1, SPACE);
+            strcpy(midcode[i].arg2, SPACE);
+            strcpy(midcode[i].result, SPACE);
+            replace(tempResult, c, i);
+        }
+        else if(strcmp(midcode[i].op, "*")==0 && is_number(midcode[i].arg1, strlen(midcode[i].arg1)) && is_number(midcode[i].arg2, strlen(midcode[i].arg2)))
+        {
+            int a = atoi(midcode[i].arg1) * atoi(midcode[i].arg2);
+            char tempResult[64];
+            char c[64];
+            sprintf(c,"%d",a);
+            strcpy(tempResult, midcode[i].result);
+            strcpy(midcode[i].op, SPACE);
+            strcpy(midcode[i].arg1, SPACE);
+            strcpy(midcode[i].arg2, SPACE);
+            strcpy(midcode[i].result, SPACE);
+            replace(tempResult, c, i);
+        }
+        else if(strcmp(midcode[i].op, "/")==0 && is_number(midcode[i].arg1, strlen(midcode[i].arg1)) && is_number(midcode[i].arg2, strlen(midcode[i].arg2)))
+        {
+            int a = atoi(midcode[i].arg1) / atoi(midcode[i].arg2);
+            char tempResult[64];
+            char c[64];
+            sprintf(c,"%d",a);
+            strcpy(tempResult, midcode[i].result);
+            strcpy(midcode[i].op, SPACE);
+            strcpy(midcode[i].arg1, SPACE);
+            strcpy(midcode[i].arg2, SPACE);
+            strcpy(midcode[i].result, SPACE);
+            replace(tempResult, c, i);
+        }
+        else if (strcmp(midcode[i].op, "=")==0 && is_number(midcode[i].arg1, strlen(midcode[i].arg1)))
+        {
+            char tempResult[64];
+            strcpy(tempResult, midcode[i].result);
+            replace2(tempResult, midcode[i].arg1, i);
+        }
+        i++;
+    }
+}
 
 
 
