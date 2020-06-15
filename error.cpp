@@ -59,7 +59,7 @@ using namespace std;
 #define OUT_OF_NODE_NUM 47                                //节点表或者导出表或者dag的节点数目太多
 #define OUT_OF_ONE_NODE_VAR 48                            //一个节点上的变量数过多
 
-FILE *output_file = fopen("error.txt", "w");                                       //词法分析结果输出的文件
+FILE *output_file = fopen("./output/error.txt", "w");                                       //词法分析结果输出的文件
 void error(int error_type,int line_index){
 	switch(error_type){
 		case 1:{

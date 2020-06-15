@@ -152,43 +152,61 @@ typedef struct
 
 四元式设计：
 
-| 原始语句                 | op     | a       | b    | result |
-| ------------------------ | ------ | ------- | ---- | ------ |
-| const int a = 98         | const  | int     | 98   | a      |
-| const char b = 'a'       | const  | char    | 97   | b      |
-| void sun()               | funct  |         |      | sun    |
-| int fun()                | func   | int     |      | fun    |
-| fun(int n)               | para   | int     |      | n      |
-| n == a                   | ==     | n       | a    |        |
-| n != a                   | !=     | n       | a    |        |
-| n >= a                   | \>=    | n       | a    |        |
-| n <= a                   | <=     | n       | a    |        |
-| n > a                    | >      | n       | a    |        |
-| n < a                    | <      | n       | a    |        |
-| if(n == 1){ ...... }     | ==     | n       | 1    |        |
-|                          |        |         |      |        |
-|                          |        |         |      |        |
-|                          |        |         |      |        |
-|                          |        |         |      |        |
-| return(1);               | reta   |         |      | 1      |
-| return ;                 | ret    |         |      |        |
-| fun(n-2)                 |        |         |      |        |
-|                          |        |         |      |        |
-|                          |        |         |      |        |
-| printf("hello world\n"); | prtf   | string0 |      | string |
-| void main()              | MAIN   |         |      | main   |
-| int temp;                | int    |         |      | temp   |
-| int num[5];              | int    | array   | 5    | num    |
-| scanf(a);                | scanf  |         |      | a      |
-| i = 0                    | =      | 0       |      | i      |
-| num[i]=a;                | arrayl | a       | i    | num    |
-| temp=num[j]              | array  | num     | j    | temp   |
-|                          |        |         |      |        |
-| while(i<5){......}       |        |         |      |        |
-|                          |        |         |      |        |
-|                          |        |         |      |        |
-|                          |        |         |      |        |
-| 函数末尾                 | end    | func    |      |        |
+| 原始语句                 | op     | a       | b    | result   |
+| ------------------------ | ------ | ------- | ---- | -------- |
+| const int a = 98         | const  | int     | 98   | a        |
+| const char b = 'a'       | const  | char    | 97   | b        |
+| void sun()               | funct  |         |      | sun      |
+| int fun()                | func   | int     |      | fun      |
+| fun(int n)               | para   | int     |      | n        |
+| n == a                   | ==     | n       | a    |          |
+| n != a                   | !=     | n       | a    |          |
+| n >= a                   | \>=    | n       | a    |          |
+| n <= a                   | <=     | n       | a    |          |
+| n > a                    | >      | n       | a    |          |
+| n < a                    | <      | n       | a    |          |
+| if(n == 1){ ...... }     | ==     | n       | 1    |          |
+|                          | jne    |         |      | _LABEL_0 |
+|                          | ...... |         |      |          |
+|                          | jmp    |         |      | _LABEL_1 |
+|                          | lab    |         |      | _LABEL_0 |
+|                          | lab    |         |      | _LABEL_1 |
+| return(1);               | reta   |         |      | 1        |
+| return ;                 | ret    |         |      |          |
+| fun(n-2)                 | -      | n       | 2    | _ld0     |
+|                          | cpara  |         |      | _ld1     |
+|                          | call   | fun     |      | _ld2     |
+| printf("hello world\n"); | prtf   | string0 |      | string   |
+| printf(a);               | prtf   |         | a    | st       |
+| print("aaa",a);          | prtf   | string1 | a    | sym      |
+| void main()              | MAIN   |         |      | main     |
+| int temp;                | int    |         |      | temp     |
+| int num[5];              | int    | array   | 5    | num      |
+| scanf(a);                | scanf  |         |      | a        |
+| i = 0                    | =      | 0       |      | i        |
+| num[i]=a;                | arrayl | a       | i    | num      |
+| temp=num[j]              | array  | num     | j    | _ld3     |
+|                          | =      | _ld3    |      | temp     |
+| while(i<5){......}       | lab    |         |      | _LABEL_2 |
+|                          | i      | <       | 5    |          |
+|                          | jne    |         |      | _LABEL_3 |
+|                          | ...... |         |      |          |
+|                          | jmp    |         |      | _LABEL_2 |
+|                          | lab    |         |      | _LABEL_3 |
+| 函数末尾                 | end    | func    |      |          |
+| switch(a){               |        |         |      |          |
+| case 1: ... ;            | ==     | a       | 1    |          |
+|                          | jne    |         |      | _LABEL_5 |
+|                          | ...... |         |      |          |
+|                          | jmp    |         |      | _LABEL_4 |
+|                          | lab    |         |      | _LABEL_5 |
+| case 2: ... ;            | ==     | a       | 2    |          |
+|                          | jne    |         |      | _LABEL_6 |
+|                          | jmp    |         |      | _LABEL_4 |
+|                          | ...... |         |      |          |
+|                          | lab    |         |      | _LABEL_6 |
+| }                        | lab    |         |      | _LABEL_4 |
+|                          |        |         |      |          |
 
 
 
@@ -225,7 +243,16 @@ typedef struct
 
    **解决方案**：把正负号和数字分开识别，只识别数字，正负数留在后期语法分析再判断。
 
-3. 
+
+
+
+### 2. 语法分析中的问题
+
+
+
+### 3. 中间代码生成中遇到的问题
+
+
 
 
 

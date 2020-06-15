@@ -22,7 +22,7 @@ char op[8];
 char arg1[128];
 char arg2[128];
 char result[128];
-char SPACE[128]=" ";
+char SPACE[128];
 char switchlabel[16];
 char switchvalue[16];
 char lastlab[16];
@@ -123,6 +123,7 @@ void _program() //程序
     {
         if(token.nameid == INT || token.nameid == CHAR){
             _val_func_def();
+            genMidcode("end", "func", SPACE, SPACE);
         }else{
             save_scene();
             getnext();
@@ -132,10 +133,12 @@ void _program() //程序
             }else{
                 restore_scene();
                 _void_func_def();
+                genMidcode("end", "func", SPACE, SPACE);
             }
         }
     }
     _main_func();
+    genMidcode("end", "func", SPACE, SPACE);
     printf("<程序>\n");
 }
 
@@ -256,7 +259,7 @@ void _main_func()
         strcpy(op, "MAIN");
         genMidcode(op, SPACE, SPACE, name);
         address = 0;
-        insert_symbol(name, TYPE_FUNC, VALUE_FUNC_VOID, 0, -1);
+        insert_symbol(name, TYPE_FUNC, VALUE_FUNC_VOID, 0, 0);
         getnext();
         if(token.nameid==LPAREN){
             getnext();
@@ -488,7 +491,7 @@ void _state()
             restore_scene();
             //TODO
             // 辨别是否是有返回值函数的调用语句
-            _void_fun_call();
+            _val_fun_call();
 
 
             if(token.nameid==SEMIC){
@@ -641,7 +644,7 @@ void _switch_state()
     if(token.nameid == LPAREN){
         getnext();
         _expr();
-        strcpy(arg1, tempstack.top().c_str());
+        strcpy(switchvalue, tempstack.top().c_str());
         tempstack.pop();
         if(token.nameid == RPAREN){
             getnext();
@@ -687,7 +690,7 @@ void _case_state()
         getnext();
         if(token.nameid == NUMBER || token.nameid == CHARSYM){
             sprintf(arg2, "%d", token.value);
-            genMidcode("==", arg1, arg2, SPACE);
+            genMidcode("==", switchvalue, arg2, SPACE);
             genMidcode("jne",SPACE,SPACE,switchlabel);
 
             getnext();
@@ -709,16 +712,18 @@ void _case_state()
     }
 }
 
-void _val_fun_call() // TODO    中间代码生成
+void _val_fun_call()
 {
     getnext();
     if(token.nameid == LPAREN){
         getnext();
         _val_para_list();
         strcpy(op, "call");
-        strcpy(result, "no");
         strcpy(arg1, tempstack.top().c_str());
         tempstack.pop();
+        tempstack.push(genVar());
+        strcpy(result, tempstack.top().c_str());
+        insert_symbol(result, TYPE_VAR, VALUE_VAR, ++address, -1);//向符号表中插入中间的临时变量
         genMidcode(op, arg1, SPACE, result);
         if(token.nameid == RPAREN){
             getnext();
@@ -786,7 +791,7 @@ void _assign_state()
         tempstack.pop();
         strcpy(result, tempstack.top().c_str());
         genMidcode("=", arg1, SPACE, result);
-        printf("普通变量赋值\n");//TODO 还有可能是数组变量赋值，数组在右边
+        printf("普通变量赋值\n");
     }else if(token.nameid == LMPAREN){
         getnext();
         _expr();
@@ -872,6 +877,8 @@ void _write_state()//TODO
             }else if(token.nameid == RPAREN){
                 getnext();
                 strcpy(arg1, tempstack.top().c_str());
+                tempstack.pop();
+                //cout<<tempstack.top()<<endl;
                 genMidcode("prtf", arg1, SPACE, "string");
                 printf("printf(字符串)\n");
             }else{
@@ -925,45 +932,49 @@ void _return_state()
     }
 }
 
-void _expr() // TODO 中间代码生成·
+void _expr()
 {
+    char tempop[10];
     if(token.nameid == PLUS || token.nameid == MINUS){
-//        tempstack.push("0");
-//        strcpy(op, token.id.c_str());
+        tempstack.push("0");
+        strcpy(tempop, token.id.c_str());
         getnext();
         _term();
-//        strcpy(arg2, tempstack.top().c_str());
-//        tempstack.pop();
-//        strcpy(arg1, tempstack.top().c_str());
-//        tempstack.pop();
-//        strcpy(result, genVar());
-//        tempstack.push(result);
-//        genMidcode(op, arg1, arg2, result);
+        strcpy(arg2, tempstack.top().c_str());
+        tempstack.pop();
+        strcpy(arg1, tempstack.top().c_str());
+        tempstack.pop();
+        strcpy(result, genVar());
+        tempstack.push(result);
+        insert_symbol(result, TYPE_VAR, VALUE_VAR, ++address, -1);
+        genMidcode(tempop, arg1, arg2, result);
         while(token.nameid == PLUS || token.nameid == MINUS){
-//            strcpy(op, token.id.c_str());
+            strcpy(tempop, token.id.c_str());
             getnext();
             _term();
-//            strcpy(arg2, tempstack.top().c_str());
-//            tempstack.pop();
-//            strcpy(arg1, tempstack.top().c_str());
-//            tempstack.pop();
-//            strcpy(result, genVar());
-//            tempstack.push(result);
-//            genMidcode(op, arg1, arg2, result);
+            strcpy(arg2, tempstack.top().c_str());
+            tempstack.pop();
+            strcpy(arg1, tempstack.top().c_str());
+            tempstack.pop();
+            strcpy(result, genVar());
+            tempstack.push(result);
+            insert_symbol(result, TYPE_VAR, VALUE_VAR, ++address, -1);
+            genMidcode(tempop, arg1, arg2, result);
         }
     }else{
         _term();
         while(token.nameid == PLUS || token.nameid == MINUS){
-//            strcpy(op, token.id.c_str());
+            strcpy(tempop, token.id.c_str());
             getnext();
             _term();
-//            strcpy(arg2, tempstack.top().c_str());
-//            tempstack.pop();
-//            strcpy(arg1, tempstack.top().c_str());
-//            tempstack.pop();
-//            strcpy(result, genVar());
-//            tempstack.push(result);
-//            genMidcode(op, arg1, arg2, result);
+            strcpy(arg2, tempstack.top().c_str());
+            tempstack.pop();
+            strcpy(arg1, tempstack.top().c_str());
+            tempstack.pop();
+            strcpy(result, genVar());
+            tempstack.push(result);
+            insert_symbol(result, TYPE_VAR, VALUE_VAR, ++address, -1);
+            genMidcode(tempop, arg1, arg2, result);
         }
     }
 }
@@ -972,16 +983,18 @@ void _term()
 {
     _factor();
     while(token.nameid == MULT || token.nameid == DIV){
-        strcpy(op, token.id.c_str());
+        char tempop[10];
+        strcpy(tempop, token.id.c_str());
         getnext();
         _factor();
         strcpy(arg2, tempstack.top().c_str());
         tempstack.pop();
         strcpy(arg1, tempstack.top().c_str());
         tempstack.pop();
-        strcpy(result, tempstack.top().c_str());
-        tempstack.pop();
-        genMidcode(op, arg1, arg2, result);
+        strcpy(result, genVar());
+        tempstack.push(result);
+        insert_symbol(result, TYPE_VAR, VALUE_VAR, ++address, -1);
+        genMidcode(tempop, arg1, arg2, result);
     }
 }
 
@@ -1010,6 +1023,7 @@ void _factor()
     }else if(token.nameid == ID){
         save_scene();
         tempstack.push(token.id);
+        //cout<<token.id<<endl;
         getnext();
         if(token.nameid == LPAREN){
             restore_scene();
@@ -1018,6 +1032,14 @@ void _factor()
         }else if (token.nameid == LMPAREN){
             getnext();
             _expr();
+            strcpy(arg1, tempstack.top().c_str());
+            tempstack.pop();
+            strcpy(arg2, tempstack.top().c_str());
+            tempstack.pop();
+            tempstack.push(genVar());
+            strcpy(result, tempstack.top().c_str());
+            insert_symbol(result, TYPE_VAR, VALUE_VAR, ++address, -1);
+            genMidcode("array", arg1, arg2, result);
             if(token.nameid == RMPAREN){
                 printf("<因子>:=<标识符><表达式>\n");
                 getnext();
@@ -1027,6 +1049,9 @@ void _factor()
             }
         }else{
             printf("<因子>:=<标识符>\n");
+            //cout<<tempstack.top()<<endl;
+            //cout<<token.id<<endl;
+            //tempstack.push(token.id);
             //getnext();
         }
     }else{

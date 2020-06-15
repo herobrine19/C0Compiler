@@ -60,7 +60,7 @@ string resource = ""; // 源代码
 string reservedWord[] = {"int", "char", "void", "const", "main", "if", "else", "while", "switch", "case", "scanf", "printf", "return"}; // 保留字
 string reservedName[] = {"INT", "CHAR", "VOID", "CONST", "MAIN", "IF", "ELSE", "WHILE", "SWITCH", "CASE", "SCANF", "PRINTF", "RETURN"};
 
-ofstream tokenFile("token.txt");
+ofstream tokenFile("./output/token.txt");
 
 bool is_digit(char a)
 {
@@ -98,14 +98,19 @@ void writeToken(string name, int nameid, string id, int value)
     token.nameid = nameid;
     token.id = id;
     token.value = value;
-    //cout<<id<<endl;
-    tokenFile<<name<<'\t'<<nameid<<'\t'<<id<<'\t'<<value<<endl;
+
+    tokenFile<<setw(10)<<setiosflags(ios::left)<<name
+             <<setw(10)<<setiosflags(ios::left)<<nameid
+             <<setw(10)<<setiosflags(ios::left)<<id
+             <<setw(10)<<setiosflags(ios::left)<<value
+             <<endl;
 }
 
 void lex_init()
 {
     filePoint = 0;
     lineIndex = 1;
+    //ofstream tokenFile("./output/token.txt");
 }
 
 /**获取下一个token**/

@@ -8,7 +8,9 @@ int factorial(int x)
 void main()
 {
 	int x,result;
-	x = 5;
-	result = factorial(x);
-	printf(result);
+	while(1){
+	    scanf(x);
+    	result = factorial(x);
+    	printf(result);
+	}
 }

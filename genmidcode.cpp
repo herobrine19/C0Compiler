@@ -2,7 +2,7 @@
 #include <cstring>
 
 
-ofstream four("./fouroved.txt");
+ofstream four("./output/fourcode.txt");
 typedef struct 
 {
     char op[8];
@@ -16,6 +16,11 @@ int labNum;
 int varNum;
 
 FourCode midcode[512];
+
+void init_fourcode()
+{
+    codeNum=0;
+}
 
 int is_number(char *a, int len){
     for(int i=0;i<len;i++){
@@ -47,10 +52,18 @@ void genMidcode(char *op, char *a, char *b, char *result)
     strcpy(midcode[codeNum].arg1, a);
     strcpy(midcode[codeNum].arg2, b);
     strcpy(midcode[codeNum].result, result);
-    four<<"op= "<<op<<"\tnum_a= "<<a<<"\tnum_b= "<<b<<"\tresult= "<<result<<endl;
+
+    //four<<"op= "<<op<<"\tnum_a= "<<a<<"\tnum_b= "<<b<<"\tresult= "<<result<<endl;
+    //左对齐，宽度为10输出
+    four<<"op= "    <<setw(10)<<setiosflags(ios::left)<<op
+        <<"num_a= " <<setw(10)<<setiosflags(ios::left)<<a
+        <<"num_b= " <<setw(10)<<setiosflags(ios::left)<<b
+        <<"result= "<<setw(10)<<setiosflags(ios::left)<<result
+        <<endl;
 
     codeNum ++;
 }
+
 
 
 

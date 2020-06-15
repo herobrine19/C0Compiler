@@ -20,6 +20,8 @@ using namespace std;
 const int MAX_SYMBOL_NUM = 512;
 const int MAX_FUNC_NUM = 512;
 
+ofstream symbol("./output/symbol.txt");
+
 typedef struct
 {
     char name[512]; //标识符的名字
@@ -83,6 +85,13 @@ void insert_symbol(char *name, int type, int value, int address, int para)
     symbolTable.elements[symbolTable.top].address = address;
     symbolTable.elements[symbolTable.top].para = para;
     symbolTable.top++;
+    symbol  << "name= "  <<setw(10)<<setiosflags(ios::left)<< name
+            << "type= "  <<setw(10)<<setiosflags(ios::left)<< type
+            << "value= " <<setw(10)<<setiosflags(ios::left)<< value
+            << "adress= "<<setw(10)<<setiosflags(ios::left)<< address
+            << "para= "  <<setw(10)<<setiosflags(ios::left)<< para
+            << endl;
+
 }
 
 void insert_para(int n)

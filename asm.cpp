@@ -6,7 +6,7 @@
 
 using namespace std;
 
-ofstream asmfile("asm.txt");
+ofstream asmfile("output/asm.txt");
 typedef struct
 {
     char name[128];
@@ -128,14 +128,15 @@ void addrset()
     int addr2;
     if((isNum(midcode[doneNum].arg1[0])==1)||midcode[doneNum].arg1[0]=='-')
     {
-        asmfile<<"\t\tli\t$t0\t"<<midcode[doneNum].arg1<<"\t\t\t#load number"<<endl;
+        asmfile<<"\t\tli\t$t0,\t"<<midcode[doneNum].arg1<<"\t\t\t#load number"<<endl;
     }
     else
     {
         addr1=findaddr(midcode[doneNum].arg1);
+        //cout<<midcode[doneNum].arg1<<endl;
         if(addr1==-1)
         {
-            asmfile <<"\t\tla\t$t0,\t"<<midcode[doneNum].arg1<<midcode[doneNum].arg1
+            asmfile <<"\t\tla\t$t0,\t"<<midcode[doneNum].arg1
                     <<"\t\t\t#load static var"<<endl;
             asmfile <<"\t\tlw\t$t0,($t0)"<<endl;
         }
@@ -155,7 +156,7 @@ void addrset()
     }
     if(isNum(midcode[doneNum].arg2[0])==1||midcode[doneNum].arg2[0]=='-')
     {
-        asmfile <<"\t\tli\t$t1\t"<<midcode[doneNum].arg2
+        asmfile <<"\t\tli\t$t1,\t"<<midcode[doneNum].arg2
                 <<"\t\t\t#load number"<<endl;
     }
     else
@@ -209,7 +210,7 @@ void glbvardef()
         if(strcmp(midcode[i].arg1, "array")==0)
         {
             strcpy(glbconst[glbNum].name, midcode[i].result);
-            strcpy(glbconst[glbNum].value, " ");
+            strcpy(glbconst[glbNum].value, SPACE);
             int step=atoi(midcode[i].arg2);
             asmfile<<midcode[i].result<<":\t.space\t"<<step*4<<endl;
             glbNum++;
@@ -218,8 +219,8 @@ void glbvardef()
         else
         {
             strcpy(glbconst[glbNum].name, midcode[i].result);
-            strcpy(glbconst[glbNum].value, " ");
-            asmfile<<midcode[i].result<<":\tspace\t"<<"4"<<endl;
+            strcpy(glbconst[glbNum].value, SPACE);
+            asmfile<<midcode[i].result<<":\t.space\t"<<"4"<<endl;
             glbNum++;
             i++;
         }
@@ -241,11 +242,13 @@ void initasm()
     while(i<codeNum)
     {
         if(strcmp(midcode[i].op, "prtf")==0){
-            if(strcmp(midcode[i].arg1, " ")!=0){
+            if(strcmp(midcode[i].arg1, SPACE)!=0){
                 sprintf(temp, "string%d", stringcnt);
+
                 strcpy(glbconst[glbNum].name, temp);
                 strcpy(glbconst[glbNum].value, midcode[i].arg1);
                 strcpy(midcode[i].arg1, temp);
+                //cout<<midcode[i].arg1<<endl;
                 asmfile<<temp<<":\t.asciiz\t"<<"\""<<glbconst[glbNum].value<<"\""<<endl;
                 glbNum++;
                 stringcnt++;
@@ -500,6 +503,7 @@ void prtf_mips()
     if(strcmp(midcode[doneNum].arg1, SPACE)!=0)
     {
         asmfile << "\t\tla\t$a0, "<<midcode[doneNum].arg1<<endl;
+        //cout<<"\t\tla\t$a0, "<<midcode[doneNum].arg1<<endl;
         asmfile << "\t\tli\t$v0,4"<<endl;//将要打印的字符串的地址赋值给 $a0
         asmfile <<"\t\tsyscall"<<endl;
     }
@@ -509,7 +513,7 @@ void prtf_mips()
     }
     if(isNum(midcode[doneNum].arg2[0])==1||midcode[doneNum].arg2[0]=='-')
     {
-        asmfile << "\t\tli\t$a0\t" << midcode[doneNum].arg2 << "\t\t\t#load number" << endl;
+        asmfile << "\t\tli\t$a0,\t" << midcode[doneNum].arg2 << "\t\t\t#load number" << endl;
         asmfile << "\t\tli\t$v0,1" << endl;//将要打印的整型赋值给 $a0
         asmfile << "\t\tsyscall" << endl;
     }
@@ -613,6 +617,8 @@ void scf_mips()
     }
     else
     {
+        //cout<<"addr:"<<addr<<endl;
+        //cout<<"prepara:"<<prepara<<endl;
         if (addr <= prepara)
         {
             addr = addr - prepara - 1;
@@ -762,18 +768,171 @@ void nst_mips()
     asmfile << "\t\tblt\t$t0,$t1\t";
 }
 
+/**
+ * 数组元素在右侧的赋值语句
+ * temp=num[j];
+ *
+ * array ,j     ,num    ,_ld0
+ * =     ,ld0   ,       ,temp
+ */
 void array_mips()
 {
-    //TODO
-    return;
+    int addr1;
+    int addr2;
+    int addr3;
+    if(isNum(midcode[doneNum].arg1[0])==1)//当j是数字时
+    {
+        asmfile << "\t\tli\t$t0,\t"<<midcode[doneNum].arg1<<endl;
+        asmfile<<"\t\tmul\t$t0,$t0,4"<<endl;
+    }
+    else
+    {
+        addr1 = findaddr(midcode[doneNum].arg1);
+        if(addr1 == -1)//如果符号表里没找到，那么是全局变量，从内存中取
+        {
+            asmfile << "\t\tla\t$t0,\t"<<midcode[doneNum].arg1<<endl;
+            asmfile << "\t\tlw\t$t0,($t0)"<<endl;
+        }
+        else
+        {
+            //prepara：当前函数的参数总数
+            if(addr1 <= prepara)//如果地址小于当前函数的参数总数，说明这个变量是函数的参数，往fp上找
+            {
+                addr1 = addr1 - prepara -1;
+            }
+            else//这个变量是函数内部的，但是不是传进来的参数，所以往fp下面找
+            {
+                addr1 = addr1 - prepara +2;
+            }
+            asmfile << "\t\tlw\t$t0,"<<-4*addr1<<"($fp)"<<endl;
+        }
+        asmfile<<"\t\tmul\t$t0,$t0,4"<<endl;
+    }
+    addr2=findaddr(midcode[doneNum].arg2);
+    if(addr2==-1)//全局的数组变量
+    {
+        asmfile <<"\t\tla\t$t1,\t"<<midcode[doneNum].arg2<<endl;//数组首地址放进t1
+        asmfile <<"\t\taddu\t$t1,$t1,$t0"<<endl;//首地址加偏移地址，放到t1里
+        asmfile <<"\t\tlw\t$t1,($t1)"<<endl;//取出数组元素放到t1
+    }
+    else
+    {
+        if(addr2 <= prepara)
+        {
+            addr2 = addr2 - prepara -1;
+        }
+        else
+        {
+            addr2 = addr2 - prepara + 2;
+        }
+        asmfile<<"\t\taddi\t$t0,$t0,"<<-4*addr2<<endl;//计算出数组首地址加上偏移地址相对于fp的地址
+        asmfile<<"\t\taddu\t$t0,$t0,$fp"<<endl;//计算出数组元素的绝对地址,放t0
+        asmfile<<"\t\tlw\t$t1,($t0)"<<endl;//取出来放在t1
+    }
+    addr3 = findaddr(midcode[doneNum].result);
+    if(addr3 == -1)//result是个全局的变量
+    {// TODO 感觉t0，t1弄反了
+        asmfile << "\t\tla\t$t0,\t"<<midcode[doneNum].result<<endl;//取出这个变量的地址，放到t1
+        asmfile << "\t\tsw\t$t1,($t0)"<<endl;//把数组元素的值存到t0所指向的地址里
+    }
+    else
+    {
+        if(addr3 <= prepara)
+        {
+            addr3 = addr3 - prepara -1;
+        }
+        else
+        {
+            addr3 = addr3 - prepara + 2;
+        }
+        asmfile<<"\t\tsw\t$t1,"<<-4*addr3<<"($fp)"<<endl;
+        asmfile<<"#array end"<<endl;
+    }
 }
 
+/**
+ * num[i]=a;
+ * arrayl,a,i,num
+ */
 void arrayl_mips()
 {
-    //TODO
-    return;
+    int addrArg1;
+    int addrArg2;
+    int addrResult;
+    if(isNum(midcode[doneNum].arg1[0])==1 || midcode[doneNum].arg1[0]=='-')
+    {
+        asmfile <<"\t\tli\t$t0,"<<midcode[doneNum].arg1<<endl;//当a是立即数时，直接取出来放到t0
+    }
+    else
+    {
+        addrArg1 = findaddr(midcode[doneNum].arg1);
+        if(addrArg1 == -1)//全局变量
+        {
+            asmfile<<"\t\tla\t$t0,"<<midcode[doneNum].arg1<<endl;//把变量a的地址取出来放进t0
+            asmfile<<"\t\tlw\t$t0,($t0)"<<endl;//把t0所指向的数据取出来放进t0
+        }
+        else//局部变量
+        {
+            if(addrArg1 <= prepara)
+            {
+                addrArg1 = addrArg1 - prepara -1;
+            }
+            else
+            {
+                addrArg1 = addrArg1 - prepara +2;
+            }
+            asmfile<<"\t\tlw\t$t0,"<<-4*addrArg1<<"($fp)"<<endl;//根据偏移地址取出来放进t0
+        }
+    }
+    if(isNum(midcode[doneNum].arg2[0])==1||midcode[doneNum].arg2[0]=='-')
+    {
+        asmfile << "\t\tli\t$t1,\t" << midcode[doneNum].arg2 << endl;//偏移地址是立即数，取出来放进t1
+        asmfile << "\t\tmul\t$t1,$t1,4" << endl;//偏移地址乘4
+    }
+    else
+    {
+        addrArg2 = findaddr(midcode[doneNum].arg2);
+        if(addrArg2==-1)//i是全局变量
+        {
+            asmfile<<"\t\tla\t$t1,"<<midcode[doneNum].arg2<<endl;//把变量i的地址取出来放在t1
+            asmfile<<"\t\tlw\t$t1,($t1)"<<endl;//把变量i的值取出来放在t1里
+        }
+        else//i是局部变量
+        {
+            if(addrArg2 <= prepara)
+            {
+                addrArg2 = addrArg2 - prepara -1;
+            }
+            else
+            {
+                addrArg2 = addrArg2 - prepara +2;
+            }
+            asmfile<<"\t\tlw\t$t1,"<<-4*addrArg2<<"($fp)"<<endl; // 取出i的值放进t1
+        }
+        asmfile<<"\t\tmul\t$t1,$t1,4"<<endl;//i的值乘4
+    }
+    addrResult = findaddr(midcode[doneNum].result);
+    if(addrResult == -1) //num是全局的数组变量
+    {
+        asmfile<<"\t\tla\t$t2,\t"<<midcode[doneNum].result<<endl;//数组首地址取出来放进t2
+        asmfile<<"\t\taddu\t$t2,$t2,$t1"<<endl;//计算出数组首地址加偏移地址存入t2
+        asmfile<<"\t\tsw\t$t0,($t2)"<<endl;//把t0中存的a的值存入数组元素num[i]中
+    }
+    else
+    {
+        if(addrResult <= prepara)
+        {
+            addrResult = addrResult - prepara -1;
+        }
+        else
+        {
+            addrResult = addrResult - prepara +2;
+        }
+        asmfile<<"\t\taddi\t$t1,$t1,"<<-4*addrResult<<endl;//数组首地址加上i
+        asmfile<<"\t\taddu\t$t1,$t1,($fp)"<<endl;//num[i]的真实地址
+        asmfile<<"\t\tsw\t$t0, ($t1)"<<endl;
+    }
 }
-
 
 /**
  * 生成汇编的主入口
