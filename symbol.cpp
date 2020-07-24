@@ -4,18 +4,21 @@
 using namespace std;
 
 //符号表中type字段
-#define TYPE_CONST  0
-#define TYPE_VAR    1
+#define TYPE_CONST_INT  0
+#define TYPE_CONST_CHAR 1
 #define TYPE_FUNC   2
 #define TYPE_PARA   3
 #define TYPE_ARRAY  4
 #define TYPE_STRING 5
+#define TYPE_VAR    6
 
 //符号表中 value字段
-#define VALUE_VAR         -1
+#define VALUE_VAR        -1
 #define VALUE_FUNC_VOID   0
 #define VALUE_FUNC_INT    1
 #define VALUE_FUNC_CHAR   2
+#define VALUE_VAR_INT     1
+#define VALUE_VAR_CHAR    2
 
 const int MAX_SYMBOL_NUM = 512;
 const int MAX_FUNC_NUM = 512;
@@ -25,12 +28,18 @@ ofstream symbol("./output/symbol.txt");
 typedef struct
 {
     char name[512]; //标识符的名字
-    int type;       //0-常量 1-变量 2-函数 3-参数 4-数组 5-string 
-    int value;      //常量的值，若type是函数，则0为void，1为int，2为char
+    int type;       //0-int常量 1-char常量 2-函数 3-参数 4-数组 5-string 6-变量
+    int value;      //常量的值，若type是函数，则0为void，1为int，2为char，若type是变量，1为int，2为char
     int address;    //标识符存储地址或者地址偏移量
     int para;       //函数参数个数或者数组大小
 } Symbol;
 
+/**
+ * 这个表相当于是索引表，因为存在局部变量和全局变量的作用域问题，
+ * 所以要记录每一个函数的作用域范围，其实只用记录每一个函数的首地
+ * 址即可，因为一个函数的作用域范围就是在这个函数的首地址到下一个
+ * 函数的首地址之间，全局变量放在符号表的最顶层。
+ */
 typedef struct
 {
     Symbol elements[MAX_SYMBOL_NUM];    //符号表
@@ -145,3 +154,4 @@ int search_symbol(char *name, int type)
     }
     return -1;
 }
+

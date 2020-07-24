@@ -66,14 +66,11 @@ void _state_list();      //语句列
 void _if_state();        //条件语句
 void _state();           //语句
 void _condition();       //条件
-//void rela_op();         //关系运算符
 void _loop_state();      //循环语句
 void _switch_state();    //情况语句
 void _situation_list();  //情况表
 void _case_state();      //情况子语句
 void _val_fun_call();    //有返回值函数调用语句1
-void _val_fun_call2();   //有返回值函数调用语句2
-void _void_fun_call();   //无返回值函数调用语句
 void _val_para_list();   //值参数表
 void _assign_state();    //赋值语句
 void _read_state();      //读语句
@@ -327,7 +324,7 @@ void _const_def()
             strcpy(arg1, "int");
             sprintf(arg2, "%d", value);
             genMidcode(op, arg1, arg2, name);
-            insert_symbol(name, TYPE_CONST, value, ++address, -1);
+            insert_symbol(name, TYPE_CONST_INT, value, ++address, -1);
             getnext();
         }while(token.nameid == COMMA);       
     }
@@ -352,9 +349,11 @@ void _const_def()
             }
             strcpy(op, "const");
             strcpy(arg1, "char");
-            sprintf(arg2, "%d", value);
+            sprintf(arg2, "%s", token.id.c_str());
+
+            //cout<<arg2<<endl;
             genMidcode(op, arg1, arg2, name);
-            insert_symbol(name, TYPE_CONST, token.value, ++address, -1);
+            insert_symbol(name, TYPE_CONST_CHAR, token.value, ++address, -1);
             getnext();
         }while(token.nameid == COMMA);
     }
@@ -395,7 +394,14 @@ void _var_def()
             getnext();
         }else{
             genMidcode(op, SPACE, SPACE, name);
-            insert_symbol(name, TYPE_VAR, VALUE_VAR, ++address, -1);
+            int value_var=0;
+            if(strcmp(op, "int")==0){
+                value_var=VALUE_VAR_INT;
+            } else if(strcmp(op, "char")==0)
+            {
+                value_var=VALUE_VAR_CHAR;
+            }
+            insert_symbol(name, TYPE_VAR, value_var, ++address, -1);
         }
 
     }while(token.nameid == COMMA);
@@ -831,7 +837,14 @@ void _read_state()
             if(token.nameid == ID){
                 strcpy(result, token.id.c_str());
                 strcpy(op, "scanf");
-                genMidcode(op, SPACE, SPACE, result);
+                int i = search_symbol(result, TYPE_VAR);
+                if(symbolTable.elements[i].value == VALUE_VAR_INT)
+                {
+                    genMidcode(op, "int", SPACE, result);
+                } else{
+                    genMidcode(op, "char", SPACE, result);
+                }
+
                 getnext();
             }else{
                 error(ID_ERROR, lineIndex);
@@ -856,7 +869,7 @@ void _write_state()//TODO
     getnext();
     if(token.nameid == LPAREN){
         getnext();
-        if(token.nameid == STRING){
+        if(token.nameid == STRING || token.nameid==CHARSYM){
             tempstack.push(token.id);
             getnext();
             if(token.nameid == COMMA){
@@ -867,7 +880,27 @@ void _write_state()//TODO
                     tempstack.pop();
                     strcpy(arg1, tempstack.top().c_str());
                     tempstack.pop();
-                    genMidcode("prtf", arg1, arg2, "sym");
+                    int i=search_symbol(arg2, TYPE_VAR);
+                    if(symbolTable.elements[i].type==TYPE_CONST_INT)
+                    {
+                        genMidcode("prtf", arg1, arg2, "int");
+                    }
+                    else if(symbolTable.elements[i].type==TYPE_CONST_CHAR)
+                    {
+                        genMidcode("prtf", arg1, arg2, "char");
+                    }
+                    else if(symbolTable.elements[i].type==TYPE_VAR)
+                    {
+                        if(symbolTable.elements[i].value==VALUE_VAR_INT)
+                        {
+                            genMidcode("prtf", arg1, arg2, "int");
+                        }
+                        else
+                        {
+                            genMidcode("prtf", arg1, arg2, "char");
+                        }
+                    }
+                    //genMidcode("prtf", arg1, arg2, "sym");
                     printf("printf(字符串，表达式)\n");
                     getnext();
                 }else{
@@ -890,8 +923,27 @@ void _write_state()//TODO
             if(token.nameid == RPAREN){
                 getnext();
                 strcpy(arg2, tempstack.top().c_str());
-                tempstack.pop();
-                genMidcode("prtf", SPACE, arg2, "st");
+                int i=search_symbol(arg2, TYPE_VAR);
+                if(symbolTable.elements[i].type==TYPE_CONST_INT)
+                {
+                    genMidcode("prtf", SPACE, arg2, "int");
+                }
+                else if(symbolTable.elements[i].type==TYPE_CONST_CHAR)
+                {
+                    genMidcode("prtf", SPACE, arg2, "char");
+                }
+                else if(symbolTable.elements[i].type==TYPE_VAR)
+                {
+                    if(symbolTable.elements[i].value==VALUE_VAR_INT)
+                    {
+                        genMidcode("prtf", SPACE, arg2, "int");
+                    }
+                    else
+                    {
+                        genMidcode("prtf", SPACE, arg2, "char");
+                    }
+                }
+                //genMidcode("prtf", SPACE, arg2, "st");
                 printf("printf(表达式)\n");
             }else{
                 error(RPAR_ERROR, lineIndex);
@@ -946,7 +998,8 @@ void _expr()
         tempstack.pop();
         strcpy(result, genVar());
         tempstack.push(result);
-        insert_symbol(result, TYPE_VAR, VALUE_VAR, ++address, -1);
+        //if()
+        insert_symbol(result, TYPE_VAR, VALUE_VAR_INT, ++address, -1);
         genMidcode(tempop, arg1, arg2, result);
         while(token.nameid == PLUS || token.nameid == MINUS){
             strcpy(tempop, token.id.c_str());
@@ -958,7 +1011,7 @@ void _expr()
             tempstack.pop();
             strcpy(result, genVar());
             tempstack.push(result);
-            insert_symbol(result, TYPE_VAR, VALUE_VAR, ++address, -1);
+            insert_symbol(result, TYPE_VAR, VALUE_VAR_INT, ++address, -1);
             genMidcode(tempop, arg1, arg2, result);
         }
     }else{
@@ -973,7 +1026,7 @@ void _expr()
             tempstack.pop();
             strcpy(result, genVar());
             tempstack.push(result);
-            insert_symbol(result, TYPE_VAR, VALUE_VAR, ++address, -1);
+            insert_symbol(result, TYPE_VAR, VALUE_VAR_INT, ++address, -1);
             genMidcode(tempop, arg1, arg2, result);
         }
     }
@@ -993,7 +1046,7 @@ void _term()
         tempstack.pop();
         strcpy(result, genVar());
         tempstack.push(result);
-        insert_symbol(result, TYPE_VAR, VALUE_VAR, ++address, -1);
+        insert_symbol(result, TYPE_VAR, VALUE_VAR_INT, ++address, -1);
         genMidcode(tempop, arg1, arg2, result);
     }
 }

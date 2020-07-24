@@ -1,0 +1,29 @@
+
+int fun(char a)
+{
+	int b,c;
+	b=1;
+	c=1;
+	while ((b*c)==1)
+	{
+
+		b = 2;
+	}
+	return (c);
+}
+
+void fun2(){
+	return;
+}
+
+
+void main()
+{
+	int kkk1;
+	scanf(kkk1);
+	char aaa;
+	aaa='c';
+	int b = kkk1 / 100 * fun(aaa) + 2020;
+	printf(kkk1);
+	return;
+}

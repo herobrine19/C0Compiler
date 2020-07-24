@@ -1,0 +1,13 @@
+char a;
+
+void main()
+{
+    int i;
+    i=10;
+    while(i>0)
+    {
+        /*scanf(a);*/
+        printf("a");
+        i=i-1;
+    }
+}

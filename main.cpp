@@ -20,7 +20,11 @@ string readFileIntoString(const string& filename)
     return buf.str();
 }
 
-void first_scan(string s)
+/**
+ * 去掉注释
+ * @param s
+ */
+void remove_annotation(string s)
 {
     int i;
     string temps = "";
@@ -55,7 +59,7 @@ void first_scan(string s)
 
 int main()
 {
-    for(int i=19;i<20;i++)
+    for(int i=1;i<2;i++)
     {
 
         while(!tempstack.empty()){
@@ -64,9 +68,10 @@ int main()
         cout<<"****************************************************************************************************************************************************"<<endl;
         printf("Now test%d:\n", i);
         char fileName[30];
-        sprintf(fileName, "../test/test%d.txt", i);
+        //sprintf(fileName, "../test/test%d.txt", i);
+        sprintf(fileName, "./test/test%d.txt", i);
         resource = readFileIntoString(fileName);
-        first_scan(resource);
+        remove_annotation(resource);
         //cout<<resource<<endl;
         //int n = resource.length();
         lex_init();
@@ -74,12 +79,12 @@ int main()
         init_symbol_table();
         init_fourcode();
         _program();
-        optimize_first();
+        optimize();
 //        for (int j = 0; j < symbolTable.top; j++){
 //            symbol << "name= " << symbolTable.elements[j].name << "\ttype= " << symbolTable.elements[j].type << "\tvalue= " << symbolTable.elements[j].value << "\tadress= " << symbolTable.elements[j].address << "\tpara= " << symbolTable.elements[j].para << endl;
 //            //symbol<<symbolTable.elements[j].name <<'\t'<< symbolTable.elements[j].type << '\t'<< symbolTable.elements[j].value <<'\t'<< symbolTable.elements[j].address <<'\t'<< symbolTable.elements[j].para << endl;
 //        }
-        run();
+        gen_asm();
         for (int j = 0; j < codeNum; j++){
             if (strcmp(midcode[j].op, " ") == 0){
                 continue;

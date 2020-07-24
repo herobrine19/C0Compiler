@@ -65,7 +65,12 @@ void genMidcode(char *op, char *a, char *b, char *result)
     codeNum ++;
 }
 
-/**下面是优化代码**/
+/**
+ * 把从b开始的所有result这个变量都用a值来替换（当前函数作用域）
+ * @param result
+ * @param a
+ * @param b
+ */
 void replace(char *result, char *a, int b)
 {
     for (int i = b +1; i < codeNum; i++)
@@ -89,7 +94,7 @@ void replace(char *result, char *a, int b)
 }
 
 /**
- * TODO
+ * 常数替换
  * @param result
  * @param a
  * @param b
@@ -122,7 +127,10 @@ void replace2(char *result, char *a, int b)
     }
 }
 
-void optimize_first()
+/**
+ * 两个优化，常量运算和常量赋值
+ */
+void optimize()
 {
     int i=0;
     while(i<codeNum)

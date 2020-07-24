@@ -1,5 +1,6 @@
 void func(int a,int b){
     printf(a+b);
+    return ;
 }
 void main(){
    char m;
